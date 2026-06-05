@@ -914,9 +914,18 @@ const switchTab = (id) => {
   // Scroll tab into view
   const activeTab = tabsContainer.querySelector('.tab.active');
   if (activeTab) {
-    setTimeout(() => activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 50);
+    // Alleen de tab-balk zelf horizontaal scrollen. scrollIntoView({inline}) zou
+    // ook de body meescrollen (die heeft overflow-x:hidden -> niet terug te scrollen),
+    // waardoor de hele pagina naar links verschuift en links afgekapt wordt.
+    setTimeout(() => {
+      const cRect = tabsContainer.getBoundingClientRect();
+      const tRect = activeTab.getBoundingClientRect();
+      const delta = (tRect.left - cRect.left) - (tabsContainer.clientWidth - tRect.width) / 2;
+      tabsContainer.scrollTo({ left: Math.max(0, tabsContainer.scrollLeft + delta), behavior: 'smooth' });
+    }, 50);
   }
   window.scrollTo({ top: 0, behavior: 'instant' });
+  document.body.scrollLeft = 0; // vangnet: herstel eventuele horizontale body-shift
 };
 
 // ===== FILTER =====
